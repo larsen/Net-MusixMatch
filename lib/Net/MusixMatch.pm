@@ -1,16 +1,11 @@
 package Net::MusixMatch;
+use Moose;
 
-use warnings;
-use strict;
 use Carp;
 
 use version; our $VERSION = qv('0.0.1');
 
-# Other recommended modules (uncomment to use):
-#  use IO::Prompt;
-#  use Perl6::Export;
-#  use Perl6::Slurp;
-#  use Perl6::Say;
+has 'api_key' => ( is => 'ro' );
 
 
 # Module implementation here
