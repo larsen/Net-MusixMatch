@@ -5,7 +5,7 @@ my $apikey = $ENV{ APIKEY };
 
 SKIP: {
 
-    skip "APIKEY env variable not defined!", 5 unless $apikey;
+    skip "APIKEY env variable not defined!", 2 unless $apikey;
 
     my $mxm = Net::MusixMatch->new( apikey => $apikey );
 
