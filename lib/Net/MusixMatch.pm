@@ -156,10 +156,19 @@ This document describes Net::MusixMatch version 0.0.1
 =head1 SYNOPSIS
 
     use Net::MusixMatch;
+    use Data::Dump qw/ dump /;
+
+    my $apikey = '...';
 
     my $mxm = Net::MusixMatch->new( apikey => $apikey );
-    my $track = $mxm->get_track( track_id => $track_id );
-    my $lyrics = $mxm->get_lyrics( lyrics_id => $lyrics_id );
+
+    my @tracks = $mxm->search_track( q_track => 'Yesterday' );
+
+    foreach my $t ( @tracks ) {
+        say $t->artist_name 
+          . ": "
+          . $t->track_name;
+    }
 
 =head1 DESCRIPTION
 
