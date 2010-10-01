@@ -1,9 +1,29 @@
-use Test::More tests => 1;
+use Test::More tests => 5;
 use Net::MusixMatch;
 
-my $mxm = Net::MusixMatch->new( api_key => '' );
+my $apikey = $ENV{ APIKEY };
 
-ok( 1 );
+SKIP: {
 
+    skip "APIKEY env variable not defined!", 5 unless $apikey;
 
+    my $mxm = Net::MusixMatch->new( apikey => $apikey );
 
+    ok( my $track = $mxm->get_track( track_id => 9113737 ));
+
+    diag $track;
+
+    isa_ok( $track, 'Net::MusixMatch::Track' );
+        can_ok( $track, 'track_name' );
+        can_ok( $track, 'artist_name' );
+
+    diag( "Track name: " . $track->track_name );
+    diag( "Artist name: " . $track->artist_name );
+
+    ok( my @tracks = $mxm->search_track( q_track => 'Yesterday' ));
+
+    foreach my $t ( @tracks ) {
+        diag $t->track_name;
+    }
+
+}

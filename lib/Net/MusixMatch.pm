@@ -1,14 +1,143 @@
 package Net::MusixMatch;
 use Moose;
 
+use Net::MusixMatch::Track;
+use Net::MusixMatch::Lyrics;
+use HTTP::Request::Common;
+use LWP::UserAgent;
+use JSON;
+use Data::Dump qw/ dump /;
 use Carp;
 
 use version; our $VERSION = qv('0.0.1');
 
-has 'api_key' => ( is => 'ro' );
+has 'base_url' => ( 
+    is => 'ro', 
+    default => 'http://api.musixmatch.com/'
+);
+
+has 'base_path' => (
+    is => 'ro',
+    default => 'ws/1.0/'
+);
+
+has 'method' => (
+	isa => 'Str',
+	is => 'ro',
+	default => 'GET'
+);
+
+has 'apikey' => ( is => 'ro' );
 
 
-# Module implementation here
+sub _call_api {
+	my $self = shift;
+
+	my $api_method = shift;
+	my %params = @_;
+
+	$params{ format } //= 'JSON';
+	$params{ apikey } = $self->apikey;
+
+	my $uri = URI->new( $self->base_url );
+	$uri->path( $self->base_path . $api_method );
+	$uri->query_form( %params );
+
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->request( GET $uri->as_string );
+
+    if ( $response->is_success ) {
+    	
+        my $json = JSON->new();
+        my $decoded_structure = $json->decode( $response->decoded_content );
+
+        return $decoded_structure;
+    }
+    else { 
+    	warn $response->code
+    }
+}
+
+
+=pod 
+
+get_track
+
+=cut
+
+
+sub get_track {
+    my $self = shift;
+    my %params = @_;
+
+    return unless $params{ track_id } 
+               || $params{ track_mbid };
+
+    my $result = $self->_call_api( 'track.get', %params );
+
+    my $track = Net::MusixMatch::Track->new( 
+        $result->{ message }->{ body }->{ track_list }->[0]->{ track } 
+    );
+	return $track;
+}
+
+
+sub search_track {
+    my $self = shift;
+    my %params = @_;
+
+    return unless $params{ q } 
+               || $params{ q_track }
+               || $params{ q_artist };
+
+    my $result = $self->_call_api( 'track.search', %params );
+
+    # We build a set of Tracks objects
+    my @tracks;
+    foreach my $track_structure ( @{$result->{ message }->{ body }->{ track_list }} ) {
+
+        push @tracks, Net::MusixMatch::Track->new( $track_structure->{ track } );
+    }
+
+    return @tracks;
+}
+
+
+sub get_lyrics {
+    my $self = shift;
+    my %params = @_;
+
+    return unless $params{ lyrics_id };
+
+    my $result = $self->_call_api( 'lyrics.get', %params );
+
+    my $lyrics = Net::MusixMatch::Lyrics->new( 
+        $result->{ message }->{ body }->{ lyrics_list }->[0]->{ lyrics } 
+    );
+	return $lyrics;
+}
+
+
+sub search_lyrics {
+    my $self = shift;
+    my %params = @_;
+
+    return unless $params{ q } 
+               || $params{ q_track }
+               || $params{ q_artist };
+
+    my $result = $self->_call_api( 'lyrics.search', %params );
+
+    # We build a set of Tracks objects
+    my @lyrics;
+    foreach my $lyrics_structure ( @{$result->{ message }->{ body }->{ lyrics_list }} ) {
+
+        push @lyrics, Net::MusixMatch::Lyrics->new( $lyrics_structure->{ lyrics } );
+    }
+
+    return @lyrics;
+}
+
 
 
 1; # Magic true value required at end of module
@@ -16,7 +145,7 @@ __END__
 
 =head1 NAME
 
-Net::MusixMatch - [One line description of module's purpose here]
+Net::MusixMatch - Perl interface for MusixMatch API
 
 
 =head1 VERSION
@@ -28,96 +157,49 @@ This document describes Net::MusixMatch version 0.0.1
 
     use Net::MusixMatch;
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-  
-  
+    my $mxm = Net::MusixMatch->new( apikey => $apikey );
+    my $track = $mxm->get_track( track_id => $track_id );
+    my $lyrics = $mxm->get_lyrics( lyrics_id => $lyrics_id );
+
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
-
+This module implements MusixMatch API, as documented here: http://developer.musixmatch.com/
 
 =head1 INTERFACE 
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+=head2 get_track
 
+Get a track info from MusixMatch's database.
 
-=head1 DIAGNOSTICS
+=head2 get_lyrics
 
-=for author to fill in:
-    List every single error and warning message that the module can
-    generate (even the ones that will "never happen"), with a full
-    explanation of each problem, one or more likely causes, and any
-    suggested remedies.
+Retreive the lyrics of a track identified by a lyrics id.
 
-=over
+=head2 search_lyrics
 
-=item C<< Error message here, perhaps with %s placeholders >>
+Search for a track in our database
 
-[Description of error here]
+=head2 search_track
 
-=item C<< Another error message here >>
-
-[Description of error here]
-
-[Et cetera, et cetera]
-
-=back
+Deprecated
 
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-=for author to fill in:
-    A full explanation of any configuration system(s) used by the
-    module, including the names and locations of any configuration
-    files, and the meaning of any environment variables or properties
-    that can be set. These descriptions must also include details of any
-    configuration language used.
-  
 Net::MusixMatch requires no configuration files or environment variables.
 
 
 =head1 DEPENDENCIES
-
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
 
 None.
 
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
 None reported.
 
 
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
