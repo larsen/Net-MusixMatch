@@ -59,13 +59,6 @@ sub _call_api {
 }
 
 
-=pod 
-
-get_track
-
-=cut
-
-
 sub get_track {
     my $self = shift;
     my %params = @_;
@@ -176,21 +169,23 @@ This module implements MusixMatch API, as documented here: http://developer.musi
 
 =head1 INTERFACE 
 
-=head2 get_track
+=head2 get_track( %options )
 
 Get a track info from MusixMatch's database.
 
-=head2 get_lyrics
+
+
+=head2 get_lyrics( %options )
 
 Retreive the lyrics of a track identified by a lyrics id.
 
-=head2 search_lyrics
-
-Search for a track in our database
-
-=head2 search_track
+=head2 search_lyrics( %options )
 
 Deprecated
+
+=head2 search_track( %options )
+
+Search for a track in our database
 
 
 =head1 CONFIGURATION AND ENVIRONMENT
