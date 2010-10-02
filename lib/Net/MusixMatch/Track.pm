@@ -1,7 +1,19 @@
 package Net::MusixMatch::Track;
 use Moose;
 
+has 'track_id' => (
+    is => 'ro',
+    isa => 'Str'
+);
+has 'track_mbid' => (
+    is => 'ro',
+    isa => 'Str'
+);
 has 'track_name' => (
+    is => 'ro',
+    isa => 'Str'
+);
+has 'artist_id' => (
     is => 'ro',
     isa => 'Str'
 );

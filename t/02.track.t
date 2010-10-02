@@ -1,5 +1,6 @@
 use Test::More tests => 6;
 use Net::MusixMatch;
+use Data::Dump qw/ dump /;
 
 my $apikey = $ENV{ APIKEY };
 
