@@ -30,6 +30,33 @@ has 'method' => (
 has 'apikey' => ( is => 'ro' );
 
 
+{
+	my $_lwp_useragent;
+
+    sub _get_lwp_useragent {
+        my $self = shift;
+
+        if ( not $_lwp_useragent ) {
+        	$_lwp_useragent = LWP::UserAgent->new;
+        }
+        return $_lwp_useragent;
+    }
+}
+
+{
+	my $_json_parser;
+
+    sub _get_json_parser { 
+        my $self = shift;
+
+        if ( not $_json_parser ) {
+        	$_json_parser = JSON->new;
+        }
+        return $_json_parser;
+    }
+}
+
+
 sub _call_api {
 	my $self = shift;
 
@@ -43,12 +70,12 @@ sub _call_api {
 	$uri->path( $self->base_path . $api_method );
 	$uri->query_form( %params );
 
-    my $ua = LWP::UserAgent->new;
+    my $ua = $self->_get_lwp_useragent;
     my $response = $ua->request( GET $uri->as_string );
 
     if ( $response->is_success ) {
     	
-        my $json = JSON->new();
+        my $json = $self->_get_json_parser;
         my $decoded_structure = $json->decode( $response->decoded_content );
 
         return $decoded_structure;
@@ -151,7 +178,7 @@ This document describes Net::MusixMatch version 0.0.1
     use Net::MusixMatch;
     use Data::Dump qw/ dump /;
 
-    my $apikey = '...';
+    my $apikey = 'c8f2e58c92721e44ebe72778e681918a';
 
     my $mxm = Net::MusixMatch->new( apikey => $apikey );
 
