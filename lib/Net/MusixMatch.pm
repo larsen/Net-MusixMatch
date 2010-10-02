@@ -178,7 +178,7 @@ This document describes Net::MusixMatch version 0.0.1
     use Net::MusixMatch;
     use Data::Dump qw/ dump /;
 
-    my $apikey = 'c8f2e58c92721e44ebe72778e681918a';
+    my $apikey = '...';
 
     my $mxm = Net::MusixMatch->new( apikey => $apikey );
 
