@@ -123,6 +123,22 @@ sub search_track {
 }
 
 
+sub get_track_chart {
+    my $self = shift;
+    my %params = @_;
+
+    my $result = $self->_call_api( 'track.chart.get', %params );
+
+    my @tracks;
+    foreach my $track_structure ( @{$result->{ message }->{ body }->{ track_list }} ) {
+
+        push @tracks, Net::MusixMatch::Track->new( $track_structure->{ track } );
+    }
+
+    return @tracks;
+}
+
+
 sub get_lyrics {
     my $self = shift;
     my %params = @_;
@@ -202,6 +218,10 @@ Get a track info from MusixMatch's database.
 =head2 get_lyrics( %options )
 
 Retreive the lyrics of a track identified by a lyrics id.
+
+=head2 get_track_chart( %options ) 
+
+Get a list of the top tracks for one of the supported countries (default US).
 
 =head2 search_lyrics( %options )
 

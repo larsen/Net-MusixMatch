@@ -1,11 +1,11 @@
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Net::MusixMatch;
 
 my $apikey = $ENV{ APIKEY };
 
 SKIP: {
 
-    skip "APIKEY env variable not defined!", 5 unless $apikey;
+    skip "APIKEY env variable not defined!", 6 unless $apikey;
 
     my $mxm = Net::MusixMatch->new( apikey => $apikey );
 
@@ -23,5 +23,8 @@ SKIP: {
     foreach my $t ( @tracks ) {
         diag $t->track_name;
     }
+
+
+    ok( my @chart = $mxm->get_track_chart );
 
 }
