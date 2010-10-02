@@ -4,6 +4,5 @@ Makefile.PL
 README
 lib/Net/MusixMatch.pm
 t/00.load.t
-t/perlcritic.t
 t/pod-coverage.t
 t/pod.t
