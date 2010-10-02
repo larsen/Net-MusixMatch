@@ -155,13 +155,10 @@ This document describes Net::MusixMatch version 0.0.1
 
     my $mxm = Net::MusixMatch->new( apikey => $apikey );
 
-    my @tracks = $mxm->search_track( q_track => 'Yesterday' );
+    my ($track)  = $mxm->search_track( q_track => 'Yesterday', q_artist => 'Beatles' );
+    my ($lyrics) = $mxm->get_lyrics( lyrics_id => $track->lyrics_id );  
 
-    foreach my $t ( @tracks ) {
-        say $t->artist_name 
-          . ": "
-          . $t->track_name;
-    }
+say $lyrics->body;
 
 =head1 DESCRIPTION
 
