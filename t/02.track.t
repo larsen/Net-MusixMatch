@@ -11,8 +11,6 @@ SKIP: {
 
     ok( my $track = $mxm->get_track( track_id => 9113737 ));
 
-    diag $track;
-
     isa_ok( $track, 'Net::MusixMatch::Track' );
         can_ok( $track, 'track_name' );
         can_ok( $track, 'artist_name' );
