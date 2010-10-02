@@ -9,6 +9,10 @@ has 'artist_name' => (
     is => 'ro',
     isa => 'Str'
 );
+has 'lyrics_id' => (
+    is => 'ro',
+    isa => 'Str'
+);
 
 1;
 __END__
