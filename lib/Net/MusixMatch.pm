@@ -18,7 +18,7 @@ has 'base_url' => (
 
 has 'base_path' => (
     is => 'ro',
-    default => 'ws/1.0/'
+    default => 'ws/1.1/'
 );
 
 has 'method' => (
@@ -96,7 +96,7 @@ sub get_track {
     my $result = $self->_call_api( 'track.get', %params );
 
     my $track = Net::MusixMatch::Track->new( 
-        $result->{ message }->{ body }->{ track_list }->[0]->{ track } 
+        $result->{ message }->{ body }->{ track }
     );
 	return $track;
 }
@@ -143,12 +143,12 @@ sub get_lyrics {
     my $self = shift;
     my %params = @_;
 
-    return unless $params{ lyrics_id };
+    return unless $params{ track_id };
 
-    my $result = $self->_call_api( 'lyrics.get', %params );
+    my $result = $self->_call_api( 'track.lyrics.get', %params );
 
     my $lyrics = Net::MusixMatch::Lyrics->new( 
-        $result->{ message }->{ body }->{ lyrics_list }->[0]->{ lyrics } 
+        $result->{ message }->{ body }->{ lyrics }
     );
 	return $lyrics;
 }
@@ -160,15 +160,18 @@ sub search_lyrics {
 
     return unless $params{ q } 
                || $params{ q_track }
-               || $params{ q_artist };
+               || $params{ q_artist }
+               || $params{ q_lyrics };
 
-    my $result = $self->_call_api( 'lyrics.search', %params );
+    my $result = $self->_call_api( 'track.search', %params );
 
-    # We build a set of Tracks objects
+    # We build a set of Lyrics objects
     my @lyrics;
-    foreach my $lyrics_structure ( @{$result->{ message }->{ body }->{ lyrics_list }} ) {
+    foreach my $track_structure ( @{$result->{ message }->{ body }->{ track_list }} ) {
 
-        push @lyrics, Net::MusixMatch::Lyrics->new( $lyrics_structure->{ lyrics } );
+        my $track_id = $track_structure->{ track }->{ track_id };
+
+        push @lyrics, $self->get_lyrics( track_id => $track_id );
     }
 
     return @lyrics;
